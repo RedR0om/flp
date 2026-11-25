@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans:
+        Figtree, ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --background: #f6f3ec;
+    --foreground: #12304f;
+    --card: #fffdf8;
+    --card-foreground: #12304f;
+    --popover: #fffdf8;
+    --popover-foreground: #12304f;
+    --primary: #f2663f;
+    --primary-foreground: #ffffff;
+    --secondary: #e7f1fa;
+    --secondary-foreground: #0a5c9e;
+    --muted: #faf7f0;
+    --muted-foreground: #5a6f86;
+    --accent: #e7f1fa;
+    --accent-foreground: #0a2a4a;
+    --destructive: #e0413a;
+    --destructive-foreground: #ffffff;
+    --border: #e6e0d3;
+    --input: #e6e0d3;
+    --ring: #0a5c9e;
+    --chart-1: #178a4a;
+    --chart-2: #7ccf97;
+    --chart-3: #f2c230;
+    --chart-4: #ee9422;
+    --chart-5: #e0413a;
+    --radius: 0.625rem;
+    --sidebar: #1fc0da;
+    --sidebar-foreground: #0a2a4a;
+    --sidebar-primary: #0a2a4a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #0a2a4a;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #0a2a4a33;
+    --sidebar-ring: #0a5c9e;
+}
+
+.dark {
+    --background: #f6f3ec;
+    --foreground: #12304f;
+    --card: #fffdf8;
+    --card-foreground: #12304f;
+    --popover: #fffdf8;
+    --popover-foreground: #12304f;
+    --primary: #f2663f;
+    --primary-foreground: #ffffff;
+    --secondary: #e7f1fa;
+    --secondary-foreground: #0a5c9e;
+    --muted: #faf7f0;
+    --muted-foreground: #5a6f86;
+    --accent: #e7f1fa;
+    --accent-foreground: #0a2a4a;
+    --destructive: #e0413a;
+    --destructive-foreground: #ffffff;
+    --border: #e6e0d3;
+    --input: #e6e0d3;
+    --ring: #0a5c9e;
+    --chart-1: #178a4a;
+    --chart-2: #7ccf97;
+    --chart-3: #f2c230;
+    --chart-4: #ee9422;
+    --chart-5: #e0413a;
+    --sidebar: #1fc0da;
+    --sidebar-foreground: #0a2a4a;
+    --sidebar-primary: #0a2a4a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #0a2a4a;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #0a2a4a33;
+    --sidebar-ring: #0a5c9e;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
