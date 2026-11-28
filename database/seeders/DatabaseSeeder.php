@@ -14,9 +14,12 @@ use Spatie\Permission\Models\Role;
 /**
  * Local demo accounts. Every seeded user signs in with the password "password".
  *
- * - admin@flp.test — division admin, all clusters
+ * - admin@flp.test — division administrator, all clusters, can edit
+ * - sds@flp.test — SDS, all clusters, view only
  * - psds.cluster6@flp.test — Lovely Rollaine B. Cruz, Cluster 6
- * - head.silangan@flp.test — Magdalena G. Centeno, Silangan Elem. Sch.
+ * - head.silangan@flp.test — Magdalena G. Centeno, Cluster 6
+ * - focal.cluster6@flp.test — FLP focal, Cluster 6
+ * - oic.cluster1@flp.test — John Keeneth Ferrera, Cluster 1
  */
 class DatabaseSeeder extends Seeder
 {
@@ -75,34 +78,39 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        User::query()->create([
-            'name' => 'Division Administrator',
-            'email' => 'admin@flp.test',
-            'password' => 'password',
-            'email_verified_at' => now(),
-        ])->assignRole(Roles::DIVISION_ADMIN);
+        $this->account('Division Administrator', 'admin@flp.test', Roles::DIVISION_ADMIN);
+
+        $this->account('Schools Division Superintendent', 'sds@flp.test', Roles::SDS);
 
         $clusterSix = $clusters[6];
-
-        User::query()->create([
-            'name' => $clusterSix->supervisor_name,
-            'email' => 'psds.cluster6@flp.test',
-            'password' => 'password',
-            'email_verified_at' => now(),
-            'cluster_id' => $clusterSix->id,
-        ])->assignRole(Roles::PSDS);
+        $this->account($clusterSix->supervisor_name, 'psds.cluster6@flp.test', Roles::PSDS, $clusterSix->id);
 
         $silangan = School::query()->where('name', 'Silangan Elem. Sch.')->firstOrFail();
+        $this->account($silangan->head_name, 'head.silangan@flp.test', Roles::SCHOOL_HEAD, $silangan->cluster_id, $silangan->id);
+        $this->account('Cluster 6 FLP Focal', 'focal.cluster6@flp.test', Roles::FLP_FOCAL, $clusterSix->id);
 
-        User::query()->create([
-            'name' => $silangan->head_name,
-            'email' => 'head.silangan@flp.test',
-            'password' => 'password',
-            'email_verified_at' => now(),
-            'cluster_id' => $silangan->cluster_id,
-            'school_id' => $silangan->id,
-        ])->assignRole(Roles::SCHOOL_HEAD);
+        $clusterOne = $clusters[1];
+        $this->account($clusterOne->supervisor_name, 'oic.cluster1@flp.test', Roles::OIC, $clusterOne->id);
 
         $this->call(MonitoringContentSeeder::class);
+    }
+
+    private function account(string $name, string $email, string $role, ?int $clusterId = null, ?int $schoolId = null): void
+    {
+        $user = User::query()->updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'password' => 'password',
+                'cluster_id' => $clusterId,
+                'school_id' => $schoolId,
+            ],
+        );
+
+        if ($user->email_verified_at === null) {
+            $user->markEmailAsVerified();
+        }
+
+        $user->syncRoles([$role]);
     }
 }

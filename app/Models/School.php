@@ -61,16 +61,12 @@ class School extends Model
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->hasRole(Roles::DIVISION_ADMIN)) {
+        if ($user->seesEverySchool()) {
             return $query;
         }
 
-        if ($user->hasRole(Roles::PSDS)) {
-            return $query->where('cluster_id', $user->cluster_id);
-        }
-
-        if ($user->hasAnyRole([Roles::SCHOOL_HEAD, Roles::FLP_FOCAL])) {
-            return $query->whereKey($user->school_id ?? 0);
+        if ($user->hasAnyRole(Roles::CLUSTER_EDITORS)) {
+            return $query->where('cluster_id', $user->cluster_id ?? 0);
         }
 
         return $query->whereKey(0);

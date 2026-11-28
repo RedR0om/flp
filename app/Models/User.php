@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -71,18 +72,27 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->belongsTo(School::class);
     }
 
+    /**
+     * @return BelongsToMany<Activity, $this>
+     */
+    public function activitiesRead(): BelongsToMany
+    {
+        return $this->belongsToMany(Activity::class, 'activity_reads')->withPivot('read_at');
+    }
+
+    public function seesEverySchool(): bool
+    {
+        return $this->hasAnyRole([Roles::DIVISION_ADMIN, Roles::SDS]);
+    }
+
     public function canViewSchool(School $school): bool
     {
-        if ($this->hasRole(Roles::DIVISION_ADMIN)) {
+        if ($this->seesEverySchool()) {
             return true;
         }
 
-        if ($this->hasRole(Roles::PSDS)) {
+        if ($this->hasAnyRole(Roles::CLUSTER_EDITORS)) {
             return $this->cluster_id !== null && $this->cluster_id === $school->cluster_id;
-        }
-
-        if ($this->hasAnyRole([Roles::SCHOOL_HEAD, Roles::FLP_FOCAL])) {
-            return $this->school_id !== null && $this->school_id === $school->id;
         }
 
         return false;

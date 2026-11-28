@@ -47,7 +47,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'can' => [
                 'manageSchools' => $user instanceof User && $user->hasRole(Roles::DIVISION_ADMIN),
-                'filterClusters' => $user instanceof User && $user->hasRole(Roles::DIVISION_ADMIN),
+                'manageUsers' => $user instanceof User && $user->hasRole(Roles::DIVISION_ADMIN),
+                'filterClusters' => $user instanceof User && $user->seesEverySchool(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

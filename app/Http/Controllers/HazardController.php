@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\FlpLevel;
 use App\Http\Controllers\Concerns\ResolvesMonitor;
 use App\Models\HazardEvent;
+use App\Support\ActivityLog;
 use App\Support\DivisionSnapshot;
 use App\Support\Hazards;
 use App\Support\Monitoring;
@@ -52,12 +53,15 @@ class HazardController extends Controller
             'level' => $hazard['level'],
         ]);
 
+        ActivityLog::record($user, null, null, 'Division condition updated', $hazard['condition'].' · '.$hazard['level']);
+
         return back();
     }
 
     public function apply(Request $request): RedirectResponse
     {
         $user = $this->monitorUser($request);
+        abort_unless($user->hasAnyRole(Roles::EDITORS), 403);
 
         if ($user->hasRole(Roles::DIVISION_ADMIN) && $request->filled('condition')) {
             $hazard = Hazards::find($request->string('condition')->toString());
@@ -71,7 +75,9 @@ class HazardController extends Controller
 
         $event = HazardEvent::query()->where('is_active', true)->firstOrFail();
 
-        foreach (Monitoring::schools($user) as $school) {
+        $schools = Monitoring::schools($user);
+
+        foreach ($schools as $school) {
             $report = $school->report;
             $school->report()->updateOrCreate([], [
                 'hazard_event_id' => $event->id,
@@ -81,6 +87,14 @@ class HazardController extends Controller
                 'ta_needed' => (bool) $report?->ta_needed,
             ]);
         }
+
+        ActivityLog::record(
+            $user,
+            null,
+            $user->hasRole(Roles::DIVISION_ADMIN) ? null : $user->cluster_id,
+            '4H level applied to schools in view',
+            $event->level->label().' · '.$event->condition.' · '.$schools->count().' schools',
+        );
 
         DivisionSnapshot::record();
 

@@ -6,7 +6,10 @@ use App\Enums\FlpLevel;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Models\HazardEvent;
 use App\Models\School;
+use App\Models\User;
+use App\Support\ActivityLog;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class SchoolController extends Controller
@@ -25,12 +28,28 @@ class SchoolController extends Controller
             'ta_needed' => false,
         ]);
 
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            $school->id,
+            null,
+            'School added',
+            $school->name,
+        );
+
         return back();
     }
 
-    public function destroy(School $school): RedirectResponse
+    public function destroy(Request $request, School $school): RedirectResponse
     {
         Gate::authorize('delete', $school);
+
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            null,
+            $school->cluster_id,
+            'School removed',
+            $school->name,
+        );
 
         $school->delete();
 

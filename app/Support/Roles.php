@@ -12,8 +12,26 @@ final class Roles
 
     public const FLP_FOCAL = 'flp_focal';
 
+    public const OIC = 'oic';
+
+    public const SDS = 'sds';
+
+    /**
+     * Edit reports, validations, and actions for one cluster.
+     * School head, FLP focal, and OIC use the same access as a PSDS.
+     *
+     * @var list<string>
+     */
+    public const CLUSTER_EDITORS = [
+        self::PSDS,
+        self::SCHOOL_HEAD,
+        self::FLP_FOCAL,
+        self::OIC,
+    ];
+
     /**
      * Roles that can edit a school report inside their scope.
+     * SDS is view-only and is intentionally absent.
      *
      * @var list<string>
      */
@@ -22,11 +40,40 @@ final class Roles
         self::PSDS,
         self::SCHOOL_HEAD,
         self::FLP_FOCAL,
+        self::OIC,
     ];
 
     /**
-     * Working roles for this build, plus the remaining titles from the
-     * role matrix so they exist before those screens are added.
+     * Roles a division administrator can assign. The remaining titles
+     * stay out until their access is defined.
+     *
+     * @var list<string>
+     */
+    public const ASSIGNABLE = [
+        self::DIVISION_ADMIN,
+        self::SDS,
+        self::PSDS,
+        self::SCHOOL_HEAD,
+        self::FLP_FOCAL,
+        self::OIC,
+    ];
+
+    public static function label(string $role): string
+    {
+        return match ($role) {
+            self::DIVISION_ADMIN => 'Division administrator',
+            self::SDS => 'SDS',
+            self::PSDS => 'PSDS',
+            self::SCHOOL_HEAD => 'School head',
+            self::FLP_FOCAL => 'FLP focal',
+            self::OIC => 'OIC',
+            default => $role,
+        };
+    }
+
+    /**
+     * Finished roles, plus titles still waiting for an access rule:
+     * SDO personnel, EPS, teacher, authorized validator, and ICT.
      *
      * @var list<string>
      */
@@ -35,9 +82,9 @@ final class Roles
         self::PSDS,
         self::SCHOOL_HEAD,
         self::FLP_FOCAL,
-        'sds',
+        self::OIC,
+        self::SDS,
         'sdo_personnel',
-        'oic',
         'eps',
         'teacher',
         'authorized_validator',

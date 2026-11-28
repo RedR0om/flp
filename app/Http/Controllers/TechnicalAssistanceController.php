@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ResolvesMonitor;
 use App\Models\School;
 use App\Models\TechnicalAssistance;
+use App\Models\User;
+use App\Support\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -54,6 +56,14 @@ class TechnicalAssistanceController extends Controller
         Gate::authorize('update', $school);
         $school->technicalAssistances()->create($data);
 
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            $school->id,
+            null,
+            'Technical assistance recorded',
+            $data['concern'].' · '.$data['status'],
+        );
+
         return back();
     }
 
@@ -63,6 +73,14 @@ class TechnicalAssistanceController extends Controller
         Gate::authorize('update', $technicalAssistance->school);
         $technicalAssistance->cycle();
 
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            $technicalAssistance->school_id,
+            null,
+            'Technical assistance status updated',
+            $technicalAssistance->concern.' · '.$technicalAssistance->status,
+        );
+
         return back();
     }
 
@@ -70,6 +88,15 @@ class TechnicalAssistanceController extends Controller
     {
         $this->monitorUser($request);
         Gate::authorize('update', $technicalAssistance->school);
+
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            $technicalAssistance->school_id,
+            null,
+            'Technical assistance removed',
+            $technicalAssistance->concern,
+        );
+
         $technicalAssistance->delete();
 
         return back();

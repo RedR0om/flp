@@ -7,7 +7,6 @@ use App\Models\Cluster;
 use App\Models\ReachSnapshot;
 use App\Models\User;
 use App\Support\Monitoring;
-use App\Support\Roles;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,7 +18,7 @@ class OverviewController extends Controller
         $user = $request->user();
         abort_unless($user instanceof User, 403);
 
-        $clusterNumber = $user->hasRole(Roles::DIVISION_ADMIN) ? $this->clusterNumber($request) : null;
+        $clusterNumber = $user->seesEverySchool() ? $this->clusterNumber($request) : null;
         $schools = Monitoring::schools($user, $clusterNumber);
         $search = trim($request->string('q')->toString());
 
@@ -85,7 +84,7 @@ class OverviewController extends Controller
      */
     private function clusters(User $user): array
     {
-        if (! $user->hasRole(Roles::DIVISION_ADMIN)) {
+        if (! $user->seesEverySchool()) {
             return [];
         }
 

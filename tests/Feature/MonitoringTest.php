@@ -46,10 +46,12 @@ test('a psds sees only schools in their cluster', function () {
         );
 });
 
-test('a school head sees and edits only their school', function () {
+test('a school head sees and edits every school in the cluster', function () {
     $cluster = makeCluster(6);
+    $outside = makeCluster(1);
     $own = makeSchool($cluster, 'Silangan Elem. Sch.', 2643, 2223);
     $other = makeSchool($cluster, 'Palar Integrated Sch.');
+    $blocked = makeSchool($outside, 'Ususan Elementary School');
 
     $head = User::factory()->create([
         'cluster_id' => $cluster->id,
@@ -62,14 +64,15 @@ test('a school head sees and edits only their school', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('SchoolStatus')
-            ->has('schools', 1)
-            ->where('schools.0.name', 'Silangan Elem. Sch.')
-            ->where('schools.0.status', 'na')
-            ->where('schools.0.reach_rate', 84.1)
+            ->has('schools', 2)
+            ->where('schools.0.name', 'Palar Integrated Sch.')
+            ->where('schools.1.name', 'Silangan Elem. Sch.')
+            ->where('schools.1.status', 'na')
+            ->where('schools.1.reach_rate', 84.1)
         );
 
     $this->actingAs($head)
-        ->patch(route('schools.report.update', $other), [
+        ->patch(route('schools.report.update', $blocked), [
             'learners_total' => 10,
             'learners_reached' => 10,
             'flp_level' => FlpLevel::Hayo->value,
@@ -128,6 +131,68 @@ test('a division admin sees every cluster and can add a school', function () {
         ->assertRedirect();
 
     expect(School::query()->where('name', 'New FLP School')->exists())->toBeFalse();
+});
+
+test('an sds can view every school and cannot edit a report', function () {
+    $six = makeCluster(6);
+    $one = makeCluster(1);
+    $school = makeSchool($six, 'Silangan Elem. Sch.', 100, 90);
+    makeSchool($one, 'Ususan Elementary School');
+
+    $sds = User::factory()->create();
+    $sds->assignRole(Roles::SDS);
+
+    $this->actingAs($sds)
+        ->get(route('schools.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('schools', 2));
+
+    $this->actingAs($sds)
+        ->patch(route('schools.report.update', $school), [
+            'learners_total' => 10,
+            'learners_reached' => 10,
+            'flp_level' => FlpLevel::Hayo->value,
+            'ta_needed' => false,
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($sds)->post(route('hazards.apply'))->assertForbidden();
+});
+
+test('an oic edits only the assigned cluster', function () {
+    $one = makeCluster(1);
+    $six = makeCluster(6);
+    $own = makeSchool($one, 'Ususan Elementary School');
+    $other = makeSchool($six, 'Silangan Elem. Sch.');
+
+    $oic = User::factory()->create(['cluster_id' => $one->id]);
+    $oic->assignRole(Roles::OIC);
+
+    $this->actingAs($oic)
+        ->get(route('schools.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('schools', 1)
+            ->where('schools.0.name', 'Ususan Elementary School')
+        );
+
+    $this->actingAs($oic)
+        ->patch(route('schools.report.update', $other), [
+            'learners_total' => 10,
+            'learners_reached' => 10,
+            'flp_level' => FlpLevel::Hayo->value,
+            'ta_needed' => false,
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($oic)
+        ->patch(route('schools.report.update', $own), [
+            'learners_total' => 80,
+            'learners_reached' => 80,
+            'flp_level' => FlpLevel::Hayo->value,
+            'ta_needed' => false,
+        ])
+        ->assertRedirect();
 });
 
 test('overview enrollment sums submitted learner counts by cluster', function () {

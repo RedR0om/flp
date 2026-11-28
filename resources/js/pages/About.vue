@@ -9,6 +9,10 @@ defineOptions({
 
 const tabs = [
     ['Overview', 'Division totals, the Taguig school map, status mix, school snapshot, and the reach-rate trend saved from real reports.'],
+    ['FLP Events', 'Each stored school report and the hazard condition linked to it.'],
+    ['Master Data', 'The school directory: name, cluster, school head, and supervisor. Public school IDs are not in the current records.'],
+    ['Learner Reach', 'Learner and reached counts summed from the school reports you can see.'],
+    ['Issues & Risks', 'Schools below 90% reach, and schools marked for technical assistance.'],
     ['Section Details', 'Sections and learner internet access for the schools you can edit.'],
     ['Modality Monitoring', 'Home-Based, Blended, Online, Printed ADM, and Offline Digital / HTML counts, summed from each school.'],
     ['School Status', 'Learners, reach, 4H level, and whether technical assistance is needed.'],
@@ -16,6 +20,8 @@ const tabs = [
     ['Action / Technical Assistance', 'Concerns, the assigned action, who is responsible, and status.'],
     ['Reports & Export', 'School-status and action CSV files, plus a one-page narrative you can print or download.'],
     ['4H Hazard Mapping', 'The division condition and the HAYO, HINAY, HINGA, or HINTO level it maps to.'],
+    ['Notifications & Activity History', 'The reports, findings, and assistance already on file, plus later changes made in the app.'],
+    ['Users', 'Division administrators create accounts and set each person’s role and cluster.'],
 ];
 </script>
 

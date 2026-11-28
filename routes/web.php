@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\ContinuityController;
 use App\Http\Controllers\HazardController;
 use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\ModalityController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\SchoolReportController;
 use App\Http\Controllers\SchoolStatusController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TechnicalAssistanceController;
+use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\ValidationController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +24,12 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', OverviewController::class)->name('dashboard');
+    Route::get('events', [ContinuityController::class, 'events'])->name('events.index');
+    Route::get('master-data', [ContinuityController::class, 'masterData'])->name('master-data.index');
+    Route::get('learner-reach', [ContinuityController::class, 'learnerReach'])->name('learner-reach.index');
+    Route::get('issues', [ContinuityController::class, 'issues'])->name('issues.index');
+    Route::get('activity', [ContinuityController::class, 'history'])->name('activity.index');
+    Route::post('activity/{activity}/read', [ContinuityController::class, 'read'])->name('activity.read');
     Route::get('schools', [SchoolStatusController::class, 'index'])->name('schools.index');
     Route::post('schools', [SchoolController::class, 'store'])->name('schools.store');
     Route::patch('schools/{school}/report', [SchoolReportController::class, 'update'])->name('schools.report.update');
@@ -55,6 +63,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('hazards/apply', [HazardController::class, 'apply'])->name('hazards.apply');
 
     Route::get('about', AboutController::class)->name('about');
+
+    Route::get('users', [UserAccountController::class, 'index'])->name('users.index');
+    Route::post('users', [UserAccountController::class, 'store'])->name('users.store');
+    Route::patch('users/{user}', [UserAccountController::class, 'update'])->name('users.update');
+    Route::delete('users/{user}', [UserAccountController::class, 'destroy'])->name('users.destroy');
 });
 
 require __DIR__.'/settings.php';

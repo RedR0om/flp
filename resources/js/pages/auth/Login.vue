@@ -2,26 +2,23 @@
 import { Form, Head } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
     layout: {
-        title: 'FLP monitoring',
-        description: 'Sign in with the account issued by the division',
+        title: 'Sign in',
+        description: 'Use the account issued by the Schools Division of Taguig City and Pateros.',
     },
 });
 
 defineProps<{
     status?: string;
-    canResetPassword: boolean;
 }>();
 </script>
 
@@ -60,17 +57,7 @@ defineProps<{
             </div>
 
             <div class="grid gap-2">
-                <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
-                    <TextLink
-                        v-if="canResetPassword"
-                        :href="request()"
-                        class="text-sm"
-                        :tabindex="5"
-                    >
-                        Forgot your password?
-                    </TextLink>
-                </div>
+                <Label for="password">Password</Label>
                 <PasswordInput
                     id="password"
                     name="password"
@@ -91,7 +78,7 @@ defineProps<{
 
             <Button
                 type="submit"
-                class="mt-4 w-full"
+                class="mt-2 h-11 w-full rounded-xl text-base font-bold"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"

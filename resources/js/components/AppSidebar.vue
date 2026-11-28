@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     BadgeCheck,
+    Bell,
+    BookOpen,
+    Calendar,
     ChartColumn,
     Cloud,
     House,
     Info,
     Layers,
     School,
+    TriangleAlert,
+    UserCog,
     Users,
     Wrench,
 } from '@lucide/vue';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -26,17 +32,33 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    { title: 'Overview', href: dashboard(), icon: House },
-    { title: 'Section Details', href: '/sections', icon: Users },
-    { title: 'Modality Monitoring', href: '/modalities', icon: Layers },
-    { title: 'School Status', href: '/schools', icon: School },
-    { title: 'Validation / Home Visitation', href: '/validations', icon: BadgeCheck },
-    { title: 'Action / Technical Assistance', href: '/actions', icon: Wrench },
-    { title: 'Reports & Export', href: '/reports', icon: ChartColumn },
-    { title: '4H Hazard Mapping', href: '/hazards', icon: Cloud },
-    { title: 'About', href: '/about', icon: Info },
-];
+const page = usePage<{ can: { manageUsers: boolean } }>();
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        { title: 'Overview', href: dashboard(), icon: House },
+        { title: 'FLP Events', href: '/events', icon: Calendar },
+        { title: 'Master Data', href: '/master-data', icon: BookOpen },
+        { title: 'Learner Reach', href: '/learner-reach', icon: Users },
+        { title: 'Issues & Risks', href: '/issues', icon: TriangleAlert },
+        { title: 'Section Details', href: '/sections', icon: Users },
+        { title: 'Modality Monitoring', href: '/modalities', icon: Layers },
+        { title: 'School Status', href: '/schools', icon: School },
+        { title: 'Validation / Home Visitation', href: '/validations', icon: BadgeCheck },
+        { title: '4H Hazard Mapping', href: '/hazards', icon: Cloud },
+        { title: 'Action / Technical Assistance', href: '/actions', icon: Wrench },
+        { title: 'Reports & Export', href: '/reports', icon: ChartColumn },
+        { title: 'Notifications & Activity History', href: '/activity', icon: Bell },
+    ];
+
+    if (page.props.can.manageUsers) {
+        items.push({ title: 'Users', href: '/users', icon: UserCog });
+    }
+
+    items.push({ title: 'About', href: '/about', icon: Info });
+
+    return items;
+});
 </script>
 
 <template>

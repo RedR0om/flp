@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ResolvesMonitor;
 use App\Models\School;
+use App\Models\User;
 use App\Models\Validation;
+use App\Support\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -59,6 +61,14 @@ class ValidationController extends Controller
         Gate::authorize('update', $school);
         $school->validations()->create($data);
 
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            $school->id,
+            null,
+            'Validation finding recorded',
+            $data['finding'],
+        );
+
         return back();
     }
 
@@ -66,6 +76,15 @@ class ValidationController extends Controller
     {
         $this->monitorUser($request);
         Gate::authorize('update', $validation->school);
+
+        ActivityLog::record(
+            $request->user() instanceof User ? $request->user() : null,
+            $validation->school_id,
+            null,
+            'Validation finding removed',
+            $validation->finding,
+        );
+
         $validation->delete();
 
         return back();

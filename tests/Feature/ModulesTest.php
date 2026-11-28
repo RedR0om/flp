@@ -27,22 +27,32 @@ test('guests are redirected from the remaining monitoring screens', function () 
     $this->get(route('reports.index'))->assertRedirect(route('login'));
     $this->get(route('hazards.index'))->assertRedirect(route('login'));
     $this->get(route('about'))->assertRedirect(route('login'));
+    $this->get(route('events.index'))->assertRedirect(route('login'));
+    $this->get(route('master-data.index'))->assertRedirect(route('login'));
+    $this->get(route('learner-reach.index'))->assertRedirect(route('login'));
+    $this->get(route('issues.index'))->assertRedirect(route('login'));
+    $this->get(route('activity.index'))->assertRedirect(route('login'));
 });
 
-test('a school head only manages sections in their school', function () {
+test('a school head manages sections for the cluster', function () {
     $cluster = makeCluster(6);
+    $outside = makeCluster(1);
     $own = makeSchool($cluster, 'Silangan Elem. Sch.');
     $other = makeSchool($cluster, 'Palar Integrated Sch.');
+    $blocked = makeSchool($outside, 'Ususan Elementary School');
 
-    $head = User::factory()->create(['school_id' => $own->id]);
+    $head = User::factory()->create([
+        'cluster_id' => $cluster->id,
+        'school_id' => $own->id,
+    ]);
     $head->assignRole(Roles::SCHOOL_HEAD);
 
     $this->actingAs($head)
-        ->post(route('sections.store'), ['name' => 'Grade 6 - A', 'school_id' => $other->id])
+        ->post(route('sections.store'), ['name' => 'Grade 6 - A', 'school_id' => $blocked->id])
         ->assertForbidden();
 
     $this->actingAs($head)
-        ->post(route('sections.store'), ['name' => 'Grade 6 - A', 'school_id' => $own->id])
+        ->post(route('sections.store'), ['name' => 'Grade 6 - A', 'school_id' => $other->id])
         ->assertRedirect();
 
     $this->actingAs($head)
@@ -52,7 +62,7 @@ test('a school head only manages sections in their school', function () {
             ->component('Sections')
             ->has('sections', 1)
             ->where('sections.0.name', 'Grade 6 - A')
-            ->where('sections.0.school_name', 'Silangan Elem. Sch.')
+            ->where('sections.0.school_name', 'Palar Integrated Sch.')
         );
 });
 
@@ -106,7 +116,10 @@ test('an action status cycles to the next step', function () {
         'status' => 'Requested',
     ]);
 
-    $head = User::factory()->create(['school_id' => $school->id]);
+    $head = User::factory()->create([
+        'cluster_id' => $cluster->id,
+        'school_id' => $school->id,
+    ]);
     $head->assignRole(Roles::SCHOOL_HEAD);
 
     $this->actingAs($head)->patch(route('actions.update', $action))->assertRedirect();
